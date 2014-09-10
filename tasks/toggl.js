@@ -8,6 +8,8 @@
 
 'use strict';
 
+var datejs = require('datejs');
+var Duration = require('duration-js');
 var _       = require('lodash');
 var print   = require('node-print');
 var request = require('request');
@@ -131,6 +133,14 @@ module.exports = function(grunt) {
       settings = _.extend(settings, fileSettings);
     }
 
+    var optionalStartDate = grunt.option('start');
+    var optionalDuration = grunt.option('duration');
+    if(optionalStartDate && optionalDuration) {
+      optionalStartDate = new Date(Date.parse(optionalStartDate));
+      optionalDuration = Duration.parse(optionalDuration);
+      var optionalEndDate = new Date(optionalStartDate.getTime() + optionalDuration);
+    }
+    
     var optionalDescription = grunt.option('desc');
     if(!settings.data) {
       settings.data = {};
@@ -145,11 +155,16 @@ module.exports = function(grunt) {
         options.data.description = optionalDescription;
       }
     }
-
+    if(options.data) {
+      options.data.billable = options.data.billable ? options.data.billable : settings.data.billable;
+      options.data.tags = options.data.tags ? options.data.tags : settings.data.tags;
+    }
+    // console.log(settings);
     // Use option values, overrides file values if any, otherwise default nulls
     settings.apiKey    = options.apiKey    ? options.apiKey    : settings.apiKey;
     settings.workspace = options.workspace ? options.workspace : settings.workspace;
     settings.project   = options.project   ? options.project   : settings.project;
+    settings.data   = options.data   ? options.data   : settings.data;
 
     // Make sure we have a key
     if (typeof settings.apiKey !== 'string' || !settings.apiKey.length) {
@@ -206,6 +221,14 @@ module.exports = function(grunt) {
       var date = new Date();
       var start = date.toISOString();
       var duration = -(date.getTime() / 1000); // must be in SECONDS
+      if(optionalDuration && optionalStartDate) {
+        console.log("creating time entry: ", options.data.description);
+        console.log("start:", optionalStartDate);
+        console.log("end:  ", optionalEndDate);
+        start = optionalStartDate.toISOString();
+        duration = optionalDuration.seconds();
+      }
+
       var defaults = {
         wid:          settings.workspace,
         start:        start,

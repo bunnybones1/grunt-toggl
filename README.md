@@ -191,6 +191,14 @@ and you will be able to simply call
 grunt toggl:stop
 ```
 
+#### Log an old time entry
+
+Use:
+```
+grunt toggl:MYTASK --desc="twiddling my thumbs" --start="sept 10, 10am" --duration="2h"
+```
+To enter an old time entry. This uses [datejs](https://www.npmjs.org/package/datejs) and [duration-js](https://www.npmjs.org/package/duration-js) to take many informal styles of entering dates/times to create old task logs.
+
 #### Default Options
 
 ```js
